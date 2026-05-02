@@ -9,6 +9,15 @@ import (
 	"github.com/google/uuid"
 )
 
+func Health(w http.ResponseWriter, r *http.Request) {
+	resp := map[string]string{
+		"status": "ok",
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(resp)
+}
+
 func (h *Handler) EmitError(w http.ResponseWriter, r *http.Request) {
 	e := event.Event{
 		ID:        uuid.NewString(),
