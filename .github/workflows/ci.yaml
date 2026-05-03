@@ -17,14 +17,17 @@ jobs:
 
       - name: Set up Go
         uses: actions/setup-go@v6
+        with:
+          go-version: "1.26.1"
+          cache-dependency-path: event-simulator/go.mod
 
       - name: Go Vet
         run: go vet ./...
-        working-directory: ./event-simulator
+        working-directory: event-simulator
 
       - name: Test
         run: go test ./...
-        working-directory: ./event-simulator
+        working-directory: event-simulator
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v6
