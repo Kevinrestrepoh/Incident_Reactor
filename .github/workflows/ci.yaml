@@ -20,9 +20,11 @@ jobs:
 
       - name: Go Vet
         run: go vet ./...
+        working-directory: ./event-simulator
 
       - name: Test
         run: go test ./...
+        working-directory: ./event-simulator
 
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v6
