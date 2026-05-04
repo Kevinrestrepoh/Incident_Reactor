@@ -35,16 +35,25 @@ resource "aws_iam_role_policy" "oidc_policy" {
     Version = "2012-10-17",
     Statement = [
       {
+        Effect   = "Allow",
+        Action   = ["ecr:GetAuthorizationToken"],
+        Resource = "*"
+      },
+      {
         Effect = "Allow",
         Action = [
-          "ecr:GetAuthorizationToken",
           "ecr:BatchCheckLayerAvailability",
           "ecr:CompleteLayerUpload",
           "ecr:InitiateLayerUpload",
           "ecr:UploadLayerPart",
           "ecr:PutImage",
-          "eks:DescribeCluster",
+          "ecr:BatchGetImage",
         ],
+        Resource = "arn:aws:ecr:us-east-2:491429108696:repository/incident-reactor"
+      },
+      {
+        Effect   = "Allow",
+        Action   = ["eks:DescribeCluster"],
         Resource = "*"
       }
     ]
