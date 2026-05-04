@@ -42,7 +42,8 @@ resource "aws_iam_role_policy" "oidc_policy" {
           "ecr:CompleteLayerUpload",
           "ecr:InitiateLayerUpload",
           "ecr:UploadLayerPart",
-          "ecr:PutImage"
+          "ecr:PutImage",
+          "eks:DescribeCluster",
         ],
         Resource = "*"
       }

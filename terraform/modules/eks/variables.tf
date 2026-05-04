@@ -34,3 +34,8 @@ variable "min_size" {
   type        = number
   default     = 1
 }
+
+variable "github_actions_role_arn" {
+  description = "IAM role ARN for GitHub Actions"
+  type        = string
+}

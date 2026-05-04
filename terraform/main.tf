@@ -40,4 +40,6 @@ module "eks" {
   desired_size = 1
   max_size     = 2
   min_size     = 1
+
+  github_actions_role_arn = module.iam_oidc.role_arn
 }
