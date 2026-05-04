@@ -82,7 +82,7 @@ jobs:
         run: |
           IMAGE=${{ steps.login-ecr.outputs.registry }}/incident-reactor:sha-${GITHUB_SHA::7}
 
-          kubectl set image deployment/incident-reactor \
+          kubectl set image deployment/app-deployment \
             app=$IMAGE
 
-          kubectl rollout status deployment/incident-reactor
+          kubectl rollout status deployment/app-deployment
