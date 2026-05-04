@@ -27,3 +27,17 @@ module "iam_oidc" {
 
   github_repo = var.github_repo
 }
+
+module "eks" {
+  source = "./modules/eks"
+
+  name            = "incident-reactor"
+  vpc_id          = module.vpc.vpc_id
+  private_subnets = module.vpc.private_subnets
+
+  instance_types = ["t3.small"]
+
+  desired_size = 1
+  max_size     = 2
+  min_size     = 1
+}
