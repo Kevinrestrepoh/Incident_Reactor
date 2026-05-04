@@ -8,11 +8,11 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app: app-deployment
+      app: app
   template:
     metadata:
       labels:
-        app: app-deployment
+        app: app
     spec:
       containers:
         - name: app
