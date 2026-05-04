@@ -63,3 +63,26 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: "v1.35.3"
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig \
+            --region us-east-2 \
+            --name incident-reactor
+
+      - name: Apply Kubernetes manifests
+        run: kubectl apply -f k8s/
+
+      - name: Deploy new image
+        run: |
+          IMAGE=${{ steps.login-ecr.outputs.registry }}/incident-reactor:sha-${GITHUB_SHA::7}
+
+          kubectl set image deployment/incident-reactor \
+            app=$IMAGE
+
+          kubectl rollout status deployment/incident-reactor
