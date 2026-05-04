@@ -76,7 +76,7 @@ jobs:
             --name incident-reactor
 
       - name: Apply Kubernetes manifests
-        run: kubectl apply -f k8s/
+        run: kubectl apply -f k8/
 
       - name: Deploy new image
         run: |
