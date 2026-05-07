@@ -1,74 +1,114 @@
-## 🔐 GitHub Actions → AWS Authentication (OIDC)
+# Incident Reactor
 
-This project uses **OIDC (OpenID Connect)** to allow GitHub Actions to authenticate with AWS **without storing credentials**.
-
----
-
-### ⚙️ Step 1: Create OIDC Provider in AWS
-
-In **Amazon Web Services**:
-
-* Go to: `IAM → Identity providers → Add provider`
-* Provider type: `OpenID Connect`
-* Provider URL:
-
-  ```
-  https://token.actions.githubusercontent.com
-  ```
-* Audience:
-
-  ```
-  sts.amazonaws.com
-  ```
+Cloud-native event simulation platform built with Go, AWS, Terraform, Kubernetes, and GitHub Actions.
 
 ---
 
-### ⚙️ Step 2: Create IAM Role for GitHub Actions
+# Architecture
 
-* Go to: `IAM → Roles → Create role`
-* Select: `Web identity`
-* Choose the GitHub OIDC provider
-* Audience: `sts.amazonaws.com`
+## Stack
+
+* Go
+* Docker
+* Kubernetes (EKS)
+* Terraform
+* AWS ECR
+* AWS IAM / OIDC / IRSA
+* AWS ALB Ingress Controller
+* GitHub Actions
+* Prometheus
+* Grafana
 
 ---
 
-### 🛡️ Step 3: Attach Permissions (ECR push)
+# Infrastructure
 
-Example policy:
+## AWS
 
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "ecr:GetAuthorizationToken",
-        "ecr:BatchCheckLayerAvailability",
-        "ecr:CompleteLayerUpload",
-        "ecr:InitiateLayerUpload",
-        "ecr:UploadLayerPart",
-        "ecr:PutImage"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
+### Networking
+
+* Custom VPC
+* Public and private subnets
+* Internet Gateway
+* Route Tables
+
+### Compute
+
+* Amazon EKS managed cluster
+* Managed node groups
+
+### Container Registry
+
+* Amazon ECR
+
+### IAM
+
+* GitHub Actions OIDC role
+* IRSA role for AWS Load Balancer Controller
+
+### Ingress
+
+* AWS Application Load Balancer (ALB)
+* Kubernetes Ingress
+
+---
+
+# CI/CD
+
+GitHub Actions pipeline:
+
+* Runs `go vet`
+* Runs tests
+* Builds Docker image
+* Pushes image to ECR using OIDC authentication
+
+No static AWS credentials are stored in GitHub.
+
+---
+
+# Observability
+
+## Prometheus
+
+Scrapes application metrics from `/metrics`.
+
+## Grafana
+
+Visualizes Prometheus metrics.
+
+---
+
+# GitHub Actions OIDC Setup
+
+AWS IAM role is configured to trust GitHub's OIDC provider.
+
+This allows GitHub Actions to authenticate securely to AWS without long-lived credentials.
+
+## Required GitHub Secret
+
+```text
+AWS_ROLE_ARN
 ```
 
 ---
 
-### 🔑 Step 4: Add GitHub Secret
+# AWS Load Balancer Controller
 
-In your repository:
+## Add Helm repository
 
-`Settings → Secrets and variables → Actions`
+```bash
+helm repo add eks https://aws.github.io/eks-charts
+helm repo update
+```
 
-Add:
+## Install controller
 
-* **Name**: `AWS_ROLE_ARN`
-* **Value**:
-
-  ```
-  arn:aws:iam::YOUR_ACCOUNT_ID:role/github-actions-role
-  ```
+```bash
+helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+  -n kube-system \
+  --set clusterName=incident-reactor \
+  --set serviceAccount.create=true \
+  --set serviceAccount.name=aws-load-balancer-controller \
+  --set serviceAccount.annotations."eks\.amazonaws\.com/role-arn"=<ALB_ROLE_ARN> \
+  --set vpcId=<VPC_ID>
+```
